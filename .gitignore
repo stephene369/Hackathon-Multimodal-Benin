@@ -1,0 +1,9 @@
+env
+.env
+test.py
+test.ipynb
+audio fon
+.ipynb_checkpoints
+faiss_index
+speech.mp3
+demo.py

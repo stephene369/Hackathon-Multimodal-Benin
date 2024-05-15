@@ -1,0 +1,17 @@
+python-dotenv
+streamlit
+replicate
+google-generativeai
+langchain
+PyPDF2
+pdf2image
+faiss-cpu
+langchain_google_genai
+pinecone
+youtube_transcript_api
+streamlit-image-select
+requests
+transformers
+torch 
+torchvision 
+torchaudio
