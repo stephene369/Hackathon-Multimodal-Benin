@@ -71,18 +71,18 @@ with st.sidebar:
     submit = st.button("Submit & Process")
     
     st.divider()
-    st.markdown(
-        """
-        ---
-        LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
-        LinkedIn → [Anne-Marie Atignon](www.linkedin.com/in/anne-marie-atignon/)
-        LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
-        LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
-        LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
-        LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
+    # st.markdown(
+    #     """
+    #     ---
+    #     LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
+    #     LinkedIn → [Anne-Marie Atignon](www.linkedin.com/in/anne-marie-atignon/)
+    #     LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
+    #     LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
+    #     LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
+    #     LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
 
-        """
-    )
+    #     """
+    # )
 # Information
 with st.expander("Built for the Benin Multimodal AI Hackathon 2024"):
     st.markdown(
@@ -90,7 +90,7 @@ with st.expander("Built for the Benin Multimodal AI Hackathon 2024"):
         This project is a submission for the [Benin Multimodal AI Hackathon 2024](https://lablab.ai/event/benin-multimodal-ai-hackathon).
         
         Benin Food Chat uses 
-        You can find the submission in this [GitHub repo]()
+        You can find the submission in this [GitHub repo](https://github.com/AbdelTID/Hackathon-Multimodal-Benin)
         """
     )
     st.subheader("Role")
@@ -148,7 +148,7 @@ if not st.session_state.greetings:
 example_prompts = [
     "Benin dish Amiwo",
     "an image of atassi",
-    "Amiwo dish with chicken-leg",
+    "an illustration of Benin dish amiwo",
 ]
 
 example_prompts_help = [
@@ -166,7 +166,8 @@ button_pressed = ""
 if submit:
     with st.chat_message("user"):
         st.audio(uploaded_file.read(), format='audio/wav')
-        transcription = pipe(uploaded_file)
+        print(uploaded_file)
+        transcription = pipe(uploaded_file.read())
         
         print("Transcription:", transcription['text'])
         button_pressed=transcription
@@ -230,11 +231,11 @@ def main_func():
     {"role": "assistant", "content": response["text"], "images": image}
 )
     st.experimental_rerun()
-wav_audio_data = st_audiorec() # tadaaaa! yes, that's it! :D
+# wav_audio_data = st_audiorec() # tadaaaa! yes, that's it! :D
 
-if wav_audio_data is not None:
-    with st.chat_message("user"):
-        st.audio(wav_audio_data, format='audio/wav')
+# if wav_audio_data is not None:
+#     with st.chat_message("user"):
+#         st.audio(wav_audio_data, format='audio/wav')
 
 if prompt := (st.chat_input("What dish are you looking for? Express your mind!") or button_pressed ):
     
