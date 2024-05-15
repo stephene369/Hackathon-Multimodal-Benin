@@ -23,7 +23,7 @@ load_dotenv() ##load all the nevironment variables
 from transformers import pipeline
 
 # Create a speech recognition pipeline using a pre-trained model
-# pipe = pipeline("automatic-speech-recognition", model="chrisjay/fonxlsr")
+pipe = pipeline("automatic-speech-recognition", model="chrisjay/fonxlsr")
 
 REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN")
 REPLICATE_MODEL_ENDPOINTSTABILITY = os.getenv("REPLICATE_MODEL_ENDPOINTSTABILITY")
@@ -65,7 +65,7 @@ with st.sidebar:
     st.subheader("Benin Food Chat")
     st.markdown(
         """Nùɖúɖú is a chatbot built for anyone interested in exploring and enjoying the rich culinary heritage of Benin. 
-        It offers  speech to image  as well as text to image generation about the local food of Benin (Atassi, Amiwo, telibo wo)"""
+        It offers  speech to image  as well as text to image generation about the local food of Benin (Atassi, Amiwo)"""
     )
     uploaded_file = st.file_uploader("Choose an audio file", type=['wav', 'mp3', 'aac',"opus"])
     submit = st.button("Submit & Process")
@@ -75,7 +75,7 @@ with st.sidebar:
         """
         ---
         LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
-        LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
+        LinkedIn → [Anne-Marie Atignon](www.linkedin.com/in/anne-marie-atignon/)
         LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
         LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
         LinkedIn → [Abdel Tidjani](https://www.linkedin.com/in/abdelanlah-tidjani/)
@@ -147,7 +147,7 @@ if not st.session_state.greetings:
 # Example prompts
 example_prompts = [
     "Benin dish Amiwo",
-    "Amiwo  kpo do xwévi",
+    "an image of atassi",
     "Amiwo dish with chicken-leg",
 ]
 
@@ -158,22 +158,83 @@ example_prompts_help = [
 ]
 
 button_cols = st.columns(3)
-button_cols_2 = st.columns(3)
+# button_cols_2 = st.columns(3)
+
 
 button_pressed = ""
 
+if submit:
+    with st.chat_message("user"):
+        st.audio(uploaded_file.read(), format='audio/wav')
+        transcription = pipe(uploaded_file)
+        
+        print("Transcription:", transcription['text'])
+        button_pressed=transcription
 
-if button_cols[0].button(example_prompts[0], help=example_prompts_help[0]):
+
+if button_cols[0].button(example_prompts[0]):
     button_pressed = example_prompts[0]
-elif button_cols[1].button(example_prompts[1], help=example_prompts_help[1]):
+elif button_cols[1].button(example_prompts[1]):
     button_pressed = example_prompts[1]
-elif button_cols[2].button(example_prompts[2], help=example_prompts_help[2]):
+elif button_cols[2].button(example_prompts[2]):
     button_pressed = example_prompts[2]
 
 
+def main_func():
+    input1=prompt+" benin dish recipe"
+    response=get_gemini_response(input1)
+    st.subheader("The Recipe is")
+    for chunk in response:
+        print(st.write(chunk.text))
+        print("_"*80)
+    
+    # st.write(chat.history)
 
-# wav_audio_data = st_audiorec() # tadaaaa! yes, that's it! :D
+    # Only call the API if the "Submit" button was pressed
+    if prompt is not None :
+        # Calling the replicate API to get the image
+        with generated_images_placeholder.container():
+            all_images = []  # List to store all generated images
+            output = replicate.run(
+                model_rep,
+                input={
+                    # "seed": 13,
+                    "width": 512,
+                    "height": 512,
+                    "prompt": prompt,
+                    "refine": "no_refiner",
+                    "scheduler": "K_EULER",
+                    "lora_scale": 0.6,
+                    "num_outputs": 1,
+                    "guidance_scale": 7.5,
+                    "apply_watermark": True,
+                    "high_noise_frac": 0.8,
+                    "negative_prompt": "the absolute worst quality, distorted features",
+                    "prompt_strength": 0.8,
+                    "num_inference_steps": 50
+                }
+            )
+            print(output)
+            if output:
+                st.toast(
+                    'Your image has been generated!', icon='😍')
+                # Save generated image to session state
+                st.session_state.generated_image = output
 
+                # Displaying the image
+                for image in st.session_state.generated_image:
+                    with st.container():
+                        st.image(image, caption="Generated Image 🎈", use_column_width=False)
+        status.update(label="✅ Images generated!",state="complete", expanded=False)
+    st.session_state.messages.append(
+    {"role": "assistant", "content": response["text"], "images": image}
+)
+    st.experimental_rerun()
+wav_audio_data = st_audiorec() # tadaaaa! yes, that's it! :D
+
+if wav_audio_data is not None:
+    with st.chat_message("user"):
+        st.audio(wav_audio_data, format='audio/wav')
 
 if prompt := (st.chat_input("What dish are you looking for? Express your mind!") or button_pressed ):
     
@@ -182,78 +243,26 @@ if prompt := (st.chat_input("What dish are you looking for? Express your mind!")
         st.markdown(prompt)
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
-
     
-
-    if submit:
-        st.audio(uploaded_file.read(), format='audio/wav')
-
-
-
-    # prompt = prompt.replace('"', "").replace("'", "")
-
-
+    prompt = prompt.replace('"', "").replace("'", "").lower()
     # Placeholders for images and gallery
     generated_images_placeholder = st.empty()
     # gallery_placeholder = st.empty() # will be add later
 
     images = []
     if prompt != "":
+        model_rep = ""
+        if "amiwo" in prompt or "ami wo" in prompt or "ami wɔ" in prompt:
+            model_rep= "abdeltid/foodlocalbenin:e0868ed242d6478a91aa7fc4dc92917f1856a60c6c4c708f83b0d8ea98dffac1"
+        elif "atassi" in prompt or "atasi"in prompt:
+            model_rep= "abdeltid/foodlocalbenin:3fd0bae00e1f3d348df7768045f6e47ab90fb37bef7f82d45aa2f0f41c591313"
         # query = prompt.strip().lower()
         with st.status('👩🏾‍🍳 Whipping up your words into art...', expanded=True) as status:
             st.write("⚙️ Model initiated")
             st.write("🙆‍♀️ Stand up and strecth in the meantime")
             try:
+                main_func()
                 
-                input1=prompt+" benin dish recipe"
-                response=get_gemini_response(input1)
-                st.subheader("The Recipe is")
-                for chunk in response:
-                    print(st.write(chunk.text))
-                    print("_"*80)
-                
-                # st.write(chat.history)
-
-                # Only call the API if the "Submit" button was pressed
-                if prompt is not None :
-                    # Calling the replicate API to get the image
-                    with generated_images_placeholder.container():
-                        all_images = []  # List to store all generated images
-                        output = replicate.run(
-                            "abdeltid/foodlocalbenin:e0868ed242d6478a91aa7fc4dc92917f1856a60c6c4c708f83b0d8ea98dffac1",
-                            input={
-                                # "seed": 13,
-                                "width": 512,
-                                "height": 512,
-                                "prompt": prompt,
-                                "refine": "no_refiner",
-                                "scheduler": "K_EULER",
-                                "lora_scale": 0.6,
-                                "num_outputs": 1,
-                                "guidance_scale": 7.5,
-                                "apply_watermark": True,
-                                "high_noise_frac": 0.8,
-                                "negative_prompt": "the absolute worst quality, distorted features",
-                                "prompt_strength": 0.8,
-                                "num_inference_steps": 50
-                            }
-                        )
-                        print(output)
-                        if output:
-                            st.toast(
-                                'Your image has been generated!', icon='😍')
-                            # Save generated image to session state
-                            st.session_state.generated_image = output
-
-                            # Displaying the image
-                            for image in st.session_state.generated_image:
-                                with st.container():
-                                    st.image(image, caption="Generated Image 🎈", use_column_width=False)
-                    status.update(label="✅ Images generated!",state="complete", expanded=False)
-                st.session_state.messages.append(
-                {"role": "assistant", "content": response, "images": image}
-            )
-                st.experimental_rerun()
             except Exception as e:
                 print(e)
                 st.error(f'Encountered an error: {e}', icon="🚨")
