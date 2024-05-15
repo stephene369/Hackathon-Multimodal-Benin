@@ -15,4 +15,4 @@ transformers
 torch 
 torchvision 
 torchaudio
-streamlit-audiorecorder
+streamlit-audiorec
