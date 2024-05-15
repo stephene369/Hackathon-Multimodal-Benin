@@ -68,6 +68,8 @@ with st.sidebar:
         It offers  speech to image  as well as text to image generation about the local food of Benin (Atassi, Amiwo, telibo wo)"""
     )
     uploaded_file = st.file_uploader("Choose an audio file", type=['wav', 'mp3', 'aac',"opus"])
+    submit = st.button("Submit & Process")
+    
     st.divider()
     st.markdown(
         """
@@ -181,8 +183,11 @@ if prompt := (st.chat_input("What dish are you looking for? Express your mind!")
     # Add user message to chat history
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # if wav_audio_data is not None:
-        # st.audio(wav_audio_data, format='audio/wav')
+    
+
+    if submit:
+        st.audio(uploaded_file.read(), format='audio/wav')
+
 
 
     # prompt = prompt.replace('"', "").replace("'", "")
