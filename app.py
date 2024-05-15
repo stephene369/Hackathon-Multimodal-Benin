@@ -7,7 +7,6 @@ import replicate
 # from bokeh.models import CustomJS
 # from streamlit_bokeh_events import streamlit_bokeh_events
 # from streamlit_mic_recorder import mic_recorder
-import pyttsx3
 from dotenv import load_dotenv
 import os
 import google.generativeai as genai
@@ -115,15 +114,15 @@ col1, col2, col3 = st.columns([0.2, 0.5, 0.2])
 # col2.image("./img/anim.gif")
 
 # Initialize text-to-speech engine
-engine = pyttsx3.init()
+# engine = pyttsx3.init()
 
-def speak(text: str):
-    """Convert text to speech and return audio file."""
-    engine.save_to_file(text, 'speech.mp3')
-    engine.runAndWait()
-    with open("speech.mp3", "rb") as audio_file:
-        audio_data = audio_file.read()
-    return audio_data
+# def speak(text: str):
+#     """Convert text to speech and return audio file."""
+#     engine.save_to_file(text, 'speech.mp3')
+#     engine.runAndWait()
+#     with open("speech.mp3", "rb") as audio_file:
+#         audio_data = audio_file.read()
+#     return audio_data
 
 
 
